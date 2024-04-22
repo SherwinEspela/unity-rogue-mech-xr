@@ -27,18 +27,13 @@ public class Weapon : MonoBehaviour
         {
             if (hit.transform.gameObject.tag.ToLower().Equals("enemy"))
             {
-                Debug.Log("Did hit enemy....");
                 Enemy enemy = hit.transform.gameObject.GetComponent<Enemy>();
                 if (enemy)
                 {
                     enemy.PlaySfxImpact();
                 }
             }
-        } else
-        {
-            Debug.Log("Did NOT hit object....");
         }
-        
     }
 
     void FixedUpdate()

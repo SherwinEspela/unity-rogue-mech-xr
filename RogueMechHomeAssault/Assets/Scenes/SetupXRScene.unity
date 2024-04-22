@@ -223,7 +223,7 @@ MonoBehaviour:
   m_modelMetaTouchPlusLeftController: {fileID: 1012021147}
   m_modelMetaTouchPlusRightController: {fileID: 801083499}
   m_controller: 1
-  m_showState: 1
+  m_showState: 3
   showWhenHandsArePoweredByNaturalControllerPoses: 0
   RayHelper: {fileID: 0}
 --- !u!4 &34192235
@@ -1514,7 +1514,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   controllerButtonMapper: {fileID: 1504766061}
-  weaponRightHand: {fileID: 628876118}
+  distanceGrabInteractorRightHand: {fileID: 715881217}
 --- !u!4 &203446180
 Transform:
   m_ObjectHideFlags: 0
@@ -6253,7 +6253,7 @@ GameObject:
   - component: {fileID: 628876119}
   m_Layer: 0
   m_Name: Pistol
-  m_TagString: Untagged
+  m_TagString: Weapon
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -16689,6 +16689,12 @@ MonoBehaviour:
     Callback:
       m_PersistentCalls:
         m_Calls: []
+  - Title: RightHandGrab
+    Button: 4194304
+    ButtonMode: 1
+    Callback:
+      m_PersistentCalls:
+        m_Calls: []
 --- !u!114 &1504766062
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20998,7 +21004,7 @@ MonoBehaviour:
   m_modelMetaTouchPlusLeftController: {fileID: 2031354290}
   m_modelMetaTouchPlusRightController: {fileID: 1086997360}
   m_controller: 2
-  m_showState: 1
+  m_showState: 3
   showWhenHandsArePoweredByNaturalControllerPoses: 0
   RayHelper: {fileID: 0}
 --- !u!4 &1914922439

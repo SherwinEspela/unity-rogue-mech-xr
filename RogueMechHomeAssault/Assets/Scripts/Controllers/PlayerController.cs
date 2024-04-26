@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using Meta.XR.BuildingBlocks;
 using Oculus.Interaction;
@@ -8,43 +6,51 @@ public class PlayerController : MonoBehaviour
 {
     [SerializeField] ControllerButtonsMapper controllerButtonMapper;
     [SerializeField] DistanceGrabInteractor distanceGrabInteractorRightHand;
-    
+    [SerializeField] DistanceGrabInteractor distanceGrabInteractorLeftHand;
+
     private Weapon weaponRightHand;
+    private Weapon weaponLeftHand;
 
-    private void Start()
+    private const string TAG_WEAPON = "Weapon";
+
+    // Methods assigned to ControllerButtonMapper callbacks
+    public void OnHandGrab(bool isRight = true)
     {
-        AddButtonMapperListeners();
-    }
-
-    private void AddButtonMapperListeners()
-    {
-        var actionRightHandGrab = controllerButtonMapper.ButtonClickActions.FindLast((x) => x.Title.Equals("RightHandGrab"));
-        actionRightHandGrab.Callback.AddListener(OnRightControllerHandTriggerClicked);
-
-        var actionRightHandShoot = controllerButtonMapper.ButtonClickActions.FindLast((x) => x.Title.Equals("RightHandShoot"));
-        actionRightHandShoot.Callback.AddListener(OnRightControllerButtonIndexClicked);
-    }
-
-    private void OnRightControllerHandTriggerClicked()
-    {
-        Debug.Log("OnRightControllerHandTriggerClicked....");
-
         if (!distanceGrabInteractorRightHand) return;
-
-        var distanceInteractable = distanceGrabInteractorRightHand.DistanceInteractable;
-        if (distanceInteractable.RelativeTo.gameObject.tag.Equals("Weapon"))
+        if (!distanceGrabInteractorLeftHand) return;
+        var distanceInteractable = isRight ? distanceGrabInteractorRightHand.DistanceInteractable :
+                                            distanceGrabInteractorLeftHand.DistanceInteractable;
+        if (distanceInteractable.RelativeTo.gameObject.tag.Equals(TAG_WEAPON))
         {
-            weaponRightHand = distanceInteractable.RelativeTo.gameObject.GetComponent<Weapon>();
+            if (isRight)
+            {
+                weaponRightHand = distanceInteractable.RelativeTo.gameObject.GetComponent<Weapon>();
+            } else
+            {
+                weaponLeftHand = distanceInteractable.RelativeTo.gameObject.GetComponent<Weapon>();
+            }
         }
     }
 
-    private void OnRightControllerButtonIndexClicked()
+    public void OnHandShoot(bool isRight = true)
     {
-        Debug.Log("OnRightControllerButtonIndexClicked....");
-
-        if (weaponRightHand)
+        if (isRight)
         {
-            weaponRightHand.Shoot();
+            if (weaponRightHand) weaponRightHand.Shoot();
+        } else
+        {
+            if (weaponLeftHand) weaponLeftHand.Shoot();
+        }
+    }
+
+    public void OnHandRelease(bool isRight = true)
+    {
+        if (isRight)
+        {
+            weaponRightHand = null;
+        } else
+        {
+            weaponLeftHand = null;
         }
     }
 }

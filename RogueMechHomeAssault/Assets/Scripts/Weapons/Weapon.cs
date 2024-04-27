@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Weapon : MonoBehaviour
@@ -7,6 +5,8 @@ public class Weapon : MonoBehaviour
     [SerializeField] AudioSource sfxShoot;
     [SerializeField] AudioClip clipShoot;
     [SerializeField] Transform transformRaycastStart;
+
+    [SerializeField] bool isDebugging = false;
 
     private string stringRaycastReport;
     RaycastHit hit;
@@ -30,7 +30,7 @@ public class Weapon : MonoBehaviour
                 Enemy enemy = hit.transform.gameObject.GetComponent<Enemy>();
                 if (enemy)
                 {
-                    enemy.PlaySfxImpact();
+                    enemy.Damage();
                 }
             }
         }
@@ -46,6 +46,8 @@ public class Weapon : MonoBehaviour
         //layerMask = ~layerMask;
 
         didHit = Physics.Raycast(transformRaycastStart.position, transformRaycastStart.TransformDirection(Vector3.forward), out hit, 1000);
+
+        if (!isDebugging) return;
         if (didHit)
         {
             Debug.DrawRay(transformRaycastStart.position, transformRaycastStart.TransformDirection(Vector3.forward) * hit.distance, Color.yellow);

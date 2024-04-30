@@ -13,27 +13,29 @@ public class RoomManager : MonoBehaviour
 
     [SerializeField] bool isDebugging = false;
 
+    private List<string> debugMessages = new List<string>();
+
     private void Start()
     {
-        if (sceneRoom == null)
-        {
-            sceneRoom = GameObject.FindFirstObjectByType<OVRSceneRoom>();
-        }
+        debugMessages.Add("Start...");
+        sceneDebugger.PrintMessage(debugMessages);
 
-        if (sceneManager == null)
-        {
-            sceneManager = GameObject.FindFirstObjectByType<OVRSceneManager>();
-            sceneManager.SceneModelLoadedSuccessfully += OnSceneLoaded;
-        }
+        if (sceneRoom == null) sceneRoom = GameObject.FindFirstObjectByType<OVRSceneRoom>();
+        if (sceneManager == null) sceneManager = GameObject.FindFirstObjectByType<OVRSceneManager>();
+
+        sceneManager.SceneModelLoadedSuccessfully += OnSceneLoaded;
 
         grid = GetComponent<Grid>();
+        grid.cellGap = new Vector3(0.2f, 0.2f, 0.2f);
+
         roomBoxCollider = GetComponent<BoxCollider>();
         roomBoxCollider.isTrigger = true;
     }
 
     private void OnSceneLoaded()
     {
-        sceneDebugger.PrintMessage("OnSceneLoaded....");
+        debugMessages.Add("OnSceneLoaded...");
+        sceneDebugger.PrintMessage(debugMessages);
 
         //if (sceneRoom == null) return;
 
@@ -81,7 +83,7 @@ public class RoomManager : MonoBehaviour
                 Vector3 floorOffset = worldPos;
                 floorOffset.y += 0.5f;
 
-                AddDebugSphere(worldPos);
+                //AddDebugSphere(worldPos);
 
                 bool isInsidePlayAreaBoundary = IsInsidePlayAreaBoundary(worldPos);
 
@@ -117,14 +119,14 @@ public class RoomManager : MonoBehaviour
 
     private void DebugAvailableLocations()
     {
-        Debug.Log("DebugAvailableLocations......");
-        sceneDebugger.PrintMessage("DebugAvailableLocations.....");
+        debugMessages.Add("DebugAvailableLocations......");
+        sceneDebugger.PrintMessage(debugMessages);
 
         List<Vector3> availableLocations = GetAvailableSpawnLocations();
         if (availableLocations.Count == 0) return;
 
-        Debug.Log($"availableLocations count ==== {availableLocations.Count}");
-        sceneDebugger.PrintMessage($"availableLocations count ==== { availableLocations.Count}");
+        debugMessages.Add($"availableLocations count ==== {availableLocations.Count}");
+        sceneDebugger.PrintMessage(debugMessages);
 
         Gizmos.color = Color.green;
         foreach (Vector3 pos in availableLocations)
@@ -141,7 +143,11 @@ public class RoomManager : MonoBehaviour
         sphere.transform.localScale = Vector3.one * 0.1f;
         sphere.GetComponent<Renderer>().material.color = Color.cyan;
         var bc = sphere.GetComponent<BoxCollider>();
-        bc.enabled = false;
+        if (bc)
+        {
+            bc.enabled = false;
+        }
+        
         sphere.transform.position = pos;
     }
 }

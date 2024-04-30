@@ -2,9 +2,11 @@ using System.Collections.Generic;
 
 public class LogMessageHelper
 {
-    public static string GetMessages(List<string> messages)
+    private static List<string> messages = new List<string>();
+
+    public static string GetMessages(string newMessage)
     {
-        if (messages.Count == 0) return string.Empty;
+        messages.Add(newMessage);
         if (messages.Count == 1) return messages[0];
 
         int lastIndex = messages.Count - 1;

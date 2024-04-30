@@ -13,39 +13,35 @@ public class RoomManager : MonoBehaviour
 
     [SerializeField] bool isDebugging = false;
 
-    private List<string> debugMessages = new List<string>();
-
     private void Start()
     {
-        debugMessages.Add("Start...");
-        sceneDebugger.PrintMessage(debugMessages);
+        sceneDebugger.PrintMessage(LogMessageHelper.GetMessages("Start..."));
 
-        if (sceneRoom == null) sceneRoom = GameObject.FindFirstObjectByType<OVRSceneRoom>();
         if (sceneManager == null) sceneManager = GameObject.FindFirstObjectByType<OVRSceneManager>();
 
         sceneManager.SceneModelLoadedSuccessfully += OnSceneLoaded;
 
         grid = GetComponent<Grid>();
-        grid.cellGap = new Vector3(0.2f, 0.2f, 0.2f);
-
         roomBoxCollider = GetComponent<BoxCollider>();
         roomBoxCollider.isTrigger = true;
     }
 
     private void OnSceneLoaded()
     {
-        debugMessages.Add("OnSceneLoaded...");
-        sceneDebugger.PrintMessage(debugMessages);
+        sceneDebugger.PrintMessage(LogMessageHelper.GetMessages("OnSceneLoaded..."));
 
-        //if (sceneRoom == null) return;
+        sceneRoom = GameObject.FindFirstObjectByType<OVRSceneRoom>();
+        if (sceneRoom == null) return;
+
+        sceneDebugger.PrintMessage(LogMessageHelper.GetMessages("scene room is not null..."));
 
         //// setup room box collider
-        //float height = sceneRoom.Walls[0].Height;
-        //float width = sceneRoom.Floor.Width;
-        //float depth = sceneRoom.Floor.Height;
+        float height = sceneRoom.Walls[0].Height;
+        float width = sceneRoom.Floor.Width;
+        float depth = sceneRoom.Floor.Height;
 
-        //roomBoxCollider.size = new Vector3(width, depth, height);
-        //roomBoxCollider.center = new Vector3(0, 0, height/2);
+        roomBoxCollider.size = new Vector3(width, depth, height);
+        roomBoxCollider.center = new Vector3(0, 0, height / 2);
 
         DebugAvailableLocations();
     }
@@ -83,8 +79,6 @@ public class RoomManager : MonoBehaviour
                 Vector3 floorOffset = worldPos;
                 floorOffset.y += 0.5f;
 
-                //AddDebugSphere(worldPos);
-
                 bool isInsidePlayAreaBoundary = IsInsidePlayAreaBoundary(worldPos);
 
                 if (isInsidePlayAreaBoundary)
@@ -119,20 +113,17 @@ public class RoomManager : MonoBehaviour
 
     private void DebugAvailableLocations()
     {
-        debugMessages.Add("DebugAvailableLocations......");
-        sceneDebugger.PrintMessage(debugMessages);
+        sceneDebugger.PrintMessage(LogMessageHelper.GetMessages("DebugAvailableLocations..."));
 
         List<Vector3> availableLocations = GetAvailableSpawnLocations();
         if (availableLocations.Count == 0) return;
 
-        debugMessages.Add($"availableLocations count ==== {availableLocations.Count}");
-        sceneDebugger.PrintMessage(debugMessages);
+        string countMessage = $"availableLocations count ==== {availableLocations.Count}";
+        sceneDebugger.PrintMessage(LogMessageHelper.GetMessages(countMessage));
 
         Gizmos.color = Color.green;
         foreach (Vector3 pos in availableLocations)
         {
-            //Gizmos.DrawCube(location, grid.cellSize * .2f);
-
             AddDebugSphere(pos);
         }
     }
@@ -143,11 +134,7 @@ public class RoomManager : MonoBehaviour
         sphere.transform.localScale = Vector3.one * 0.1f;
         sphere.GetComponent<Renderer>().material.color = Color.cyan;
         var bc = sphere.GetComponent<BoxCollider>();
-        if (bc)
-        {
-            bc.enabled = false;
-        }
-        
+        if (bc) bc.enabled = false;
         sphere.transform.position = pos;
     }
 }

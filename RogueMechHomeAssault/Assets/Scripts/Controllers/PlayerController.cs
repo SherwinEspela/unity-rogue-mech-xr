@@ -20,7 +20,10 @@ public class PlayerController : MonoBehaviour
         if (!distanceGrabInteractorLeftHand) return;
         var distanceInteractable = isRight ? distanceGrabInteractorRightHand.DistanceInteractable :
                                             distanceGrabInteractorLeftHand.DistanceInteractable;
-        if (distanceInteractable.RelativeTo.gameObject.tag.Equals(TAG_WEAPON))
+
+        if (!distanceInteractable.RelativeTo) return;
+        var weaponGO = distanceInteractable.RelativeTo.gameObject;
+        if (weaponGO && weaponGO.tag.Equals(TAG_WEAPON))
         {
             if (isRight)
             {

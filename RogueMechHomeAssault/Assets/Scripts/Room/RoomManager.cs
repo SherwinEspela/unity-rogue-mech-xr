@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Meta.XR.MRUtilityKit;
 
 public class RoomManager : MonoBehaviour
 {
@@ -8,6 +9,7 @@ public class RoomManager : MonoBehaviour
     [SerializeField] OVRSceneRoom sceneRoom;
     [SerializeField] Grid grid;
     [SerializeField] BoxCollider roomBoxCollider;
+    [SerializeField] SceneDebugger sceneDebugger;
 
     [SerializeField] bool isDebugging = false;
 
@@ -31,7 +33,7 @@ public class RoomManager : MonoBehaviour
 
     private void OnSceneLoaded()
     {
-        Debug.Log("OnSceneLoaded......");
+        sceneDebugger.PrintMessage("OnSceneLoaded....");
 
         //if (sceneRoom == null) return;
 
@@ -116,11 +118,13 @@ public class RoomManager : MonoBehaviour
     private void DebugAvailableLocations()
     {
         Debug.Log("DebugAvailableLocations......");
+        sceneDebugger.PrintMessage("DebugAvailableLocations.....");
 
         List<Vector3> availableLocations = GetAvailableSpawnLocations();
         if (availableLocations.Count == 0) return;
 
         Debug.Log($"availableLocations count ==== {availableLocations.Count}");
+        sceneDebugger.PrintMessage($"availableLocations count ==== { availableLocations.Count}");
 
         Gizmos.color = Color.green;
         foreach (Vector3 pos in availableLocations)

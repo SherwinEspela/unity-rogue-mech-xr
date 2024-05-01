@@ -6,19 +6,34 @@ using Meta.XR.MRUtilityKit;
 public class RoomManager : MonoBehaviour
 {
     [SerializeField] OVRSceneManager sceneManager;
-    [SerializeField] OVRSceneRoom sceneRoom;
     [SerializeField] Grid grid;
     [SerializeField] BoxCollider roomBoxCollider;
     [SerializeField] SceneDebugger sceneDebugger;
-
     [SerializeField] bool isDebugging = false;
+
+    [SerializeField] float gridCellSize = 0.1f;
+    [SerializeField] float gridCellGap = 0.02f;
+    [SerializeField] int gridStart = -50;
+    [SerializeField] int gridEnd = 50;
+    [SerializeField] LayerMask layerMaskFurniture;
+
+    private OVRSceneRoom sceneRoom;
 
     private void Start()
     {
+        grid.cellSize = new Vector3(gridCellSize, gridCellSize, gridCellSize);
+        grid.cellGap = new Vector3(gridCellGap, gridCellGap, gridCellGap);
+
+        if (isDebugging)
+        {
+            //DebugGridComponent();
+            VisualizeGridLocations();
+            return;
+        }
+
         sceneDebugger.PrintMessage(LogMessageHelper.GetMessages("Start..."));
 
         if (sceneManager == null) sceneManager = GameObject.FindFirstObjectByType<OVRSceneManager>();
-
         sceneManager.SceneModelLoadedSuccessfully += OnSceneLoaded;
 
         grid = GetComponent<Grid>();
@@ -55,6 +70,13 @@ public class RoomManager : MonoBehaviour
         return distance <= safeDistance;
     }
 
+    private bool IsInsideFurniture(Vector3 position)
+    {
+        bool isInFurniture = Physics.CheckBox(position, grid.cellSize, transform.rotation, layerMaskFurniture);
+        //bool isBelowFurniture = Physics.Raycast(position, Vector3.up, Mathf.Infinity, layerMaskFurniture);
+        return isInFurniture;
+    }
+
     //public bool IsInsideFurniture(Vector3 position)
     //{
     //    return true;
@@ -66,12 +88,9 @@ public class RoomManager : MonoBehaviour
 
         var availablelocations = new List<Vector3>();
 
-        const int end = 25;
-        const int start = -25;
-
-        for (int i = start; i < end; i++)
+        for (int i = gridStart; i < gridEnd; i++)
         {
-            for (int j = start; j < end; j++)
+            for (int j = gridStart; j < gridEnd; j++)
             {
                 Vector3Int cell = new Vector3Int(i, 0, j);
                 Vector3 worldPos = grid.CellToWorld(cell);
@@ -91,24 +110,53 @@ public class RoomManager : MonoBehaviour
         return availablelocations;
     }
 
-    private void VisualizePlayAreaPoints()
+    private void DebugGridComponent()
     {
-        var positions = OVRManager.boundary.GetGeometry(OVRBoundary.BoundaryType.PlayArea);
+        if (grid == null) grid = GetComponent<Grid>();
+        var availablelocations = new List<Vector3>();
 
-        foreach (var pos in positions)
+        for (int i = gridStart; i < gridEnd; i++)
         {
-            var sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            sphere.transform.localScale = Vector3.one * 0.02f;
-            sphere.GetComponent<Renderer>().material.color = Color.cyan;
-            sphere.transform.position = pos;
+            for (int j = gridStart; j < gridEnd; j++)
+            {
+                Vector3Int cell = new Vector3Int(i, 0, j);
+                Vector3 worldPos = grid.CellToWorld(cell);
+
+                bool isInsideFurniture = IsInsideFurniture(worldPos);
+                if (isInsideFurniture)
+                {
+                    AddDebugSphere(worldPos);
+                }
+            }
         }
     }
 
-    //private void OnDrawGizmos()
-    //{
-    //    if (!isDebugging) return;
+    private void VisualizeGridLocations()
+    {
+        if (grid == null) grid = GetComponent<Grid>();
+ 
+        for (int i = gridStart; i < gridEnd; i++)
+        {
+            for (int j = gridStart; j < gridEnd; j++)
+            {
+                Vector3Int cell = new Vector3Int(i, 0, j);
+                Vector3 worldPos = grid.CellToWorld(cell);
+                AddDebugSphere(worldPos);
+            }
+        }
+    }
 
-        
+    //private void VisualizePlayAreaPoints()
+    //{
+    //    var positions = OVRManager.boundary.GetGeometry(OVRBoundary.BoundaryType.PlayArea);
+
+    //    foreach (var pos in positions)
+    //    {
+    //        var sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+    //        sphere.transform.localScale = Vector3.one * 0.02f;
+    //        sphere.GetComponent<Renderer>().material.color = Color.cyan;
+    //        sphere.transform.position = pos;
+    //    }
     //}
 
     private void DebugAvailableLocations()
@@ -131,8 +179,8 @@ public class RoomManager : MonoBehaviour
     private void AddDebugSphere(Vector3 pos)
     {
         var sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        sphere.transform.localScale = Vector3.one * 0.1f;
-        sphere.GetComponent<Renderer>().material.color = Color.cyan;
+        sphere.transform.localScale = Vector3.one * 0.03f;
+        sphere.GetComponent<Renderer>().material.color = Color.red;
         var bc = sphere.GetComponent<BoxCollider>();
         if (bc) bc.enabled = false;
         sphere.transform.position = pos;

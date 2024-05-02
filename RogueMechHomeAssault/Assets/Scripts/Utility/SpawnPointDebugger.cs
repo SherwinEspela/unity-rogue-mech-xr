@@ -12,18 +12,51 @@ public class SpawnPointDebugger : MonoBehaviour
     [SerializeField] Color colorDebugSphere = Color.red;
     [SerializeField] float debugSphereSize = 0.03f;
     [SerializeField] Transform spawnPointsContainer;
-    [SerializeField] LayerMask layerMaskToIgnore;
+    [SerializeField] LayerMask layerMaskFurniture;
+    [SerializeField] LayerMask layerMaskFloor;
 
     private List<GameObject> debugSpheres;
+    private List<GameObject> debugSpheresInsideFurniture;
+    private bool canUpdateFurnitureSpawnPointPositions;
 
     private void Start()
     {
         debugSpheres = new List<GameObject>();
         grid.cellSize = Vector3.one * gridCellSize;
         grid.cellGap = Vector3.one * gridCellGap;
+        canUpdateFurnitureSpawnPointPositions = false;
 
         GenerateSpawnPoints();
         SelectPointsInsideTheRoom();
+        canUpdateFurnitureSpawnPointPositions = true;
+    }
+
+    private void FixedUpdate()
+    {
+        if (canUpdateFurnitureSpawnPointPositions)
+        {
+            LayerMask layersToInclude = layerMaskFurniture | layerMaskFloor;
+
+            foreach (var ds in debugSpheres)
+            {
+                RaycastHit hit;
+                bool didHit = Physics.Raycast(
+                    ds.transform.position, 
+                    ds.transform.TransformDirection(Vector3.down), 
+                    out hit, 
+                    Mathf.Infinity, 
+                    layersToInclude
+                );
+
+                if (didHit)
+                {
+                    ds.transform.position = hit.point;
+                    ds.GetComponent<Renderer>().material.color = Color.green;
+                }
+            }
+
+            canUpdateFurnitureSpawnPointPositions = false;
+        }
     }
 
     private void GenerateSpawnPoints()
@@ -34,7 +67,7 @@ public class SpawnPointDebugger : MonoBehaviour
         {
             for (int j = gridStart; j < gridEnd; j++)
             {
-                Vector3Int cell = new Vector3Int(i, 0, j);
+                Vector3Int cell = new Vector3Int(i, (int)(transform.position.y), j);
                 Vector3 worldPos = grid.CellToWorld(cell);
                 AddDebugSphere(worldPos);
             }
@@ -46,22 +79,58 @@ public class SpawnPointDebugger : MonoBehaviour
         if (debugSpheres.Count == 0)
         {
             Debug.LogError("There are no debug spheres.");
+            return;
         }
 
+        List<GameObject> spheresInsideRoom = new List<GameObject>();
         foreach (var ds in debugSpheres)
         {
-            bool isInside = IsInsideRoom(ds.transform.position);
-            
-            // show only the debug sphere
-            // that are inside the room
-            ds.SetActive(isInside);
+            bool isHittingTheFloor = Physics.Raycast(ds.transform.position, Vector3.down, Mathf.Infinity, layerMaskFloor);
+            if (isHittingTheFloor)
+            {
+                spheresInsideRoom.Add(ds);
+            } else
+            {
+                DestroyImmediate(ds);
+            }
         }
+
+        debugSpheres.Clear();
+        debugSpheres.AddRange(spheresInsideRoom);
+    }
+
+    private void PlacePointsOnTopOfFurnitures()
+    {
+        if (debugSpheres.Count == 0)
+        {
+            Debug.LogError("There are no debug spheres.");
+            return;
+        }
+
+        debugSpheresInsideFurniture = new List<GameObject>();
+
+        foreach (var ds in debugSpheres)
+        {            
+            bool isInFurniture = Physics.CheckBox(ds.transform.position, grid.cellSize, transform.rotation, layerMaskFurniture);
+            if (isInFurniture)
+            {
+                ds.GetComponent<Renderer>().material.color = Color.blue;
+                debugSpheresInsideFurniture.Add(ds);
+            }
+        }
+
+        canUpdateFurnitureSpawnPointPositions = debugSpheresInsideFurniture.Count > 0;
     }
 
     private bool IsInsideRoom(Vector3 position)
     {
         bool isHittingTheFloor = Physics.Raycast(position, Vector3.down, Mathf.Infinity);
         return isHittingTheFloor;
+    }
+
+    private bool IsInsideFurniture(Vector3 position)
+    {
+        return Physics.CheckBox(position, grid.cellSize, transform.rotation);
     }
 
     private void AddDebugSphere(Vector3 pos)
@@ -71,10 +140,10 @@ public class SpawnPointDebugger : MonoBehaviour
         sphere.GetComponent<Renderer>().material.color = colorDebugSphere;
         var bc = sphere.GetComponent<BoxCollider>();
         if (bc) bc.enabled = false;
-        pos.y = gridCellSize;
+        sphere.transform.SetParent(this.transform);
         sphere.transform.position = pos;
         sphere.name = "DebugSphere";
-        sphere.transform.SetParent(this.transform);
+  
         debugSpheres.Add(sphere);
     }
 }

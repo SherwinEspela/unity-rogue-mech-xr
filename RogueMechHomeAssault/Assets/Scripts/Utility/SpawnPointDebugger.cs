@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class SpawnPointDebugger : MonoBehaviour
 {
@@ -11,14 +12,15 @@ public class SpawnPointDebugger : MonoBehaviour
     [SerializeField] int gridEnd = 50;
     [SerializeField] Color colorDebugSphere = Color.red;
     [SerializeField] float debugSphereSize = 0.03f;
-    [SerializeField] Transform spawnPointsContainer;
     [SerializeField] LayerMask layerMaskFurniture;
     [SerializeField] LayerMask layerMaskFloor;
+    [SerializeField] LayerMask layerMaskTrimmer;
+    [SerializeField] Material materialTrimmer;
 
     private List<GameObject> debugSpheres;
     private List<GameObject> spawnPointsFloor;
     private List<GameObject> spawnPointsFurniture;
-    private bool canUpdateFurnitureSpawnPointPositions;
+    private bool canStartPlacingPointsOnSurfaces = false;
 
     private void Start()
     {
@@ -27,49 +29,14 @@ public class SpawnPointDebugger : MonoBehaviour
         spawnPointsFurniture = new List<GameObject>();
         grid.cellSize = Vector3.one * gridCellSize;
         grid.cellGap = Vector3.one * gridCellGap;
-        canUpdateFurnitureSpawnPointPositions = false;
 
         GenerateSpawnPoints();
         SelectPointsInsideTheRoom();
-        canUpdateFurnitureSpawnPointPositions = true;
     }
 
     private void FixedUpdate()
     {
-        if (canUpdateFurnitureSpawnPointPositions)
-        {
-            LayerMask layersToInclude = layerMaskFurniture | layerMaskFloor;
-
-            foreach (var ds in debugSpheres)
-            {
-                RaycastHit hit;
-                bool didHit = Physics.Raycast(
-                    ds.transform.position, 
-                    ds.transform.TransformDirection(Vector3.down), 
-                    out hit, 
-                    Mathf.Infinity, 
-                    layersToInclude
-                );
-
-                if (didHit)
-                {
-                    ds.transform.position = hit.point;
-
-                    if (hit.transform.tag == "TagFloor")
-                    {
-                        ds.GetComponent<Renderer>().material.color = Color.blue;
-                        spawnPointsFloor.Add(ds);
-                    }
-                    else if (hit.transform.tag == "TagFurniture")
-                    {
-                        ds.GetComponent<Renderer>().material.color = Color.green;
-                        spawnPointsFurniture.Add(ds);
-                    }
-                }
-            }
-
-            canUpdateFurnitureSpawnPointPositions = false;
-        }
+        PlacePointsOnSurfaces();
     }
 
     private void GenerateSpawnPoints()
@@ -110,30 +77,76 @@ public class SpawnPointDebugger : MonoBehaviour
 
         debugSpheres.Clear();
         debugSpheres.AddRange(spheresInsideRoom);
+        canStartPlacingPointsOnSurfaces = true;
     }
 
-    //private void PlacePointsOnTopOfFurnitures()
-    //{
-    //    if (debugSpheres.Count == 0)
-    //    {
-    //        Debug.LogError("There are no debug spheres.");
-    //        return;
-    //    }
+    private void PlacePointsOnSurfaces()
+    {
+        if (canStartPlacingPointsOnSurfaces)
+        {
+            LayerMask layersToInclude = layerMaskFurniture | layerMaskFloor;
 
-    //    debugSpheresInsideFurniture = new List<GameObject>();
+            foreach (var ds in debugSpheres)
+            {
+                RaycastHit hit;
+                bool didHit = Physics.Raycast(
+                    ds.transform.position,
+                    ds.transform.TransformDirection(Vector3.down),
+                    out hit,
+                    Mathf.Infinity,
+                    layersToInclude
+                );
 
-    //    foreach (var ds in debugSpheres)
-    //    {            
-    //        bool isInFurniture = Physics.CheckBox(ds.transform.position, grid.cellSize, transform.rotation, layerMaskFurniture);
-    //        if (isInFurniture)
-    //        {
-    //            ds.GetComponent<Renderer>().material.color = Color.blue;
-    //            debugSpheresInsideFurniture.Add(ds);
-    //        }
-    //    }
+                if (didHit)
+                {
+                    ds.transform.position = hit.point;
 
-    //    canUpdateFurnitureSpawnPointPositions = debugSpheresInsideFurniture.Count > 0;
-    //}
+                    if (hit.transform.tag == "TagFloor")
+                    {
+                        ds.GetComponent<Renderer>().material.color = Color.blue;
+                        spawnPointsFloor.Add(ds);
+                    }
+                    else if (hit.transform.tag == "TagFurniture")
+                    {
+                        ds.GetComponent<Renderer>().material.color = Color.green;
+                        spawnPointsFurniture.Add(ds);
+                    }
+                }
+            }
+
+            canStartPlacingPointsOnSurfaces = false;
+
+            TrimPointsOnFloor();
+        }
+    }
+
+    private void TrimPointsOnFloor()
+    {
+        var floor = GameObject.FindGameObjectWithTag("TagFloor");
+        if (!floor) return;
+        var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        cube.GetComponent<Renderer>().material = materialTrimmer;
+        //cube.layer = layerMaskTrimmer;
+        var floorMesh = floor.gameObject.GetComponent<MeshFilter>().mesh;
+
+        if (!floorMesh) return;
+        var floorSize = floorMesh.bounds.size;
+        var floorScaleX = floor.transform.localScale.x;
+        float floorPadding = 0.5f;
+        var scaleX = floorSize.x * floorScaleX - floorPadding;
+        var scaleZ = floorSize.z * floorScaleX - floorPadding;
+        cube.transform.localScale = Vector3.one * 3f; // new Vector3(scaleX, 1f, scaleZ);
+
+        foreach (var sp in spawnPointsFloor)
+        {
+            bool isInsideCube = Physics.CheckBox(sp.transform.position, grid.cellSize / 2f, transform.rotation, layerMaskTrimmer);
+            if (!isInsideCube)
+            {
+                //spawnPointsFloor.Remove(sp);
+                DestroyImmediate(sp);
+            }
+        }
+    }
 
     private bool IsInsideRoom(Vector3 position)
     {

@@ -16,11 +16,14 @@ public class SpawnPointDebugger : MonoBehaviour
     [SerializeField] LayerMask layerMaskFloor;
     [SerializeField] LayerMask layerMaskTrimmer;
     [SerializeField] Material materialTrimmer;
+    [SerializeField] float trimPadding = 0.5f;
 
     private List<GameObject> debugSpheres;
     private List<GameObject> spawnPointsFloor;
     private List<GameObject> spawnPointsFurniture;
     private bool canStartPlacingPointsOnSurfaces = false;
+
+    private const string TAG_FURNITURE = "TagFurniture";
 
     private void Start()
     {
@@ -106,7 +109,7 @@ public class SpawnPointDebugger : MonoBehaviour
                         ds.GetComponent<Renderer>().material.color = Color.blue;
                         spawnPointsFloor.Add(ds);
                     }
-                    else if (hit.transform.tag == "TagFurniture")
+                    else if (hit.transform.tag == TAG_FURNITURE)
                     {
                         ds.GetComponent<Renderer>().material.color = Color.green;
                         spawnPointsFurniture.Add(ds);
@@ -124,28 +127,84 @@ public class SpawnPointDebugger : MonoBehaviour
     {
         var floor = GameObject.FindGameObjectWithTag("TagFloor");
         if (!floor) return;
-        var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        cube.GetComponent<Renderer>().material = materialTrimmer;
-        //cube.layer = layerMaskTrimmer;
-        var floorMesh = floor.gameObject.GetComponent<MeshFilter>().mesh;
-
-        if (!floorMesh) return;
-        var floorSize = floorMesh.bounds.size;
-        var floorScaleX = floor.transform.localScale.x;
-        float floorPadding = 0.5f;
-        var scaleX = floorSize.x * floorScaleX - floorPadding;
-        var scaleZ = floorSize.z * floorScaleX - floorPadding;
-        cube.transform.localScale = Vector3.one * 3f; // new Vector3(scaleX, 1f, scaleZ);
-
+        
+        var cube = CreateTrimmerFromRoomElement(floor);
+        
+        var remainingSpawnPoints = new List<GameObject>();
         foreach (var sp in spawnPointsFloor)
         {
-            bool isInsideCube = Physics.CheckBox(sp.transform.position, grid.cellSize / 2f, transform.rotation, layerMaskTrimmer);
-            if (!isInsideCube)
+            bool isInsideCube = IsInsideTrimmer(sp.transform.position);
+            if (isInsideCube)
             {
-                //spawnPointsFloor.Remove(sp);
+                remainingSpawnPoints.Add(sp);
+            } else
+            {
                 DestroyImmediate(sp);
             }
         }
+
+        DestroyImmediate(cube);
+
+        var furnitures = GameObject.FindGameObjectsWithTag(TAG_FURNITURE);
+        if (furnitures.Length > 0)
+        {
+            foreach (var furniture in furnitures)
+            {
+                TrimFloorPointsCloseToFurniture(furniture);
+            }
+        }
+    }
+
+    private void TrimFloorPointsCloseToFurniture(GameObject furniture)
+    {
+        var furnitureMesh = furniture.gameObject.GetComponent<MeshFilter>().mesh;
+        if (!furnitureMesh) return;
+
+        var cube = CreateTrimmerFromRoomElement(furniture);
+
+        //var remainingSpawnPoints = new List<GameObject>();
+        //foreach (var sp in spawnPointsFloor)
+        //{
+        //    bool isInsideCube = IsInsideTrimmer(sp.transform.position);
+        //    if (isInsideCube)
+        //    {
+        //        DestroyImmediate(sp);
+        //    }
+        //    else
+        //    {
+        //        remainingSpawnPoints.Add(sp);
+        //    }
+        //}
+    }
+
+    private bool IsInsideTrimmer(Vector3 position)
+    {
+        return Physics.CheckBox(position, grid.cellSize / 2f, transform.rotation, layerMaskTrimmer);
+    }
+
+    private GameObject CreateTrimmerFromRoomElement(GameObject roomElement)
+    {
+        var mesh = roomElement.gameObject.GetComponent<MeshFilter>().mesh;
+        if (!mesh) return null;
+
+        var floorSize = mesh.bounds.size;
+        var floorScaleX = roomElement.transform.localScale.x;
+        var floorScaleZ = roomElement.transform.localScale.z;
+
+        bool isFurniture = roomElement.tag == TAG_FURNITURE;
+        float padding = isFurniture ? trimPadding : -trimPadding;
+
+        var scaleX = floorSize.x * floorScaleX + padding;
+        var scaleZ = floorSize.z * floorScaleZ + padding;
+
+        var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        var bx = cube.GetComponent<BoxCollider>();
+        if (bx) DestroyImmediate(bx);
+        cube.GetComponent<Renderer>().material = materialTrimmer;
+        cube.transform.position = roomElement.transform.position;
+        cube.transform.localScale = new Vector3(scaleX, 1f, scaleZ);
+        cube.AddComponent<BoxCollider>();
+        return cube;
     }
 
     private bool IsInsideRoom(Vector3 position)

@@ -16,12 +16,15 @@ public class SpawnPointDebugger : MonoBehaviour
     [SerializeField] LayerMask layerMaskFloor;
 
     private List<GameObject> debugSpheres;
-    private List<GameObject> debugSpheresInsideFurniture;
+    private List<GameObject> spawnPointsFloor;
+    private List<GameObject> spawnPointsFurniture;
     private bool canUpdateFurnitureSpawnPointPositions;
 
     private void Start()
     {
         debugSpheres = new List<GameObject>();
+        spawnPointsFloor = new List<GameObject>();
+        spawnPointsFurniture = new List<GameObject>();
         grid.cellSize = Vector3.one * gridCellSize;
         grid.cellGap = Vector3.one * gridCellGap;
         canUpdateFurnitureSpawnPointPositions = false;
@@ -51,7 +54,17 @@ public class SpawnPointDebugger : MonoBehaviour
                 if (didHit)
                 {
                     ds.transform.position = hit.point;
-                    ds.GetComponent<Renderer>().material.color = Color.green;
+
+                    if (hit.transform.tag == "TagFloor")
+                    {
+                        ds.GetComponent<Renderer>().material.color = Color.blue;
+                        spawnPointsFloor.Add(ds);
+                    }
+                    else if (hit.transform.tag == "TagFurniture")
+                    {
+                        ds.GetComponent<Renderer>().material.color = Color.green;
+                        spawnPointsFurniture.Add(ds);
+                    }
                 }
             }
 
@@ -99,28 +112,28 @@ public class SpawnPointDebugger : MonoBehaviour
         debugSpheres.AddRange(spheresInsideRoom);
     }
 
-    private void PlacePointsOnTopOfFurnitures()
-    {
-        if (debugSpheres.Count == 0)
-        {
-            Debug.LogError("There are no debug spheres.");
-            return;
-        }
+    //private void PlacePointsOnTopOfFurnitures()
+    //{
+    //    if (debugSpheres.Count == 0)
+    //    {
+    //        Debug.LogError("There are no debug spheres.");
+    //        return;
+    //    }
 
-        debugSpheresInsideFurniture = new List<GameObject>();
+    //    debugSpheresInsideFurniture = new List<GameObject>();
 
-        foreach (var ds in debugSpheres)
-        {            
-            bool isInFurniture = Physics.CheckBox(ds.transform.position, grid.cellSize, transform.rotation, layerMaskFurniture);
-            if (isInFurniture)
-            {
-                ds.GetComponent<Renderer>().material.color = Color.blue;
-                debugSpheresInsideFurniture.Add(ds);
-            }
-        }
+    //    foreach (var ds in debugSpheres)
+    //    {            
+    //        bool isInFurniture = Physics.CheckBox(ds.transform.position, grid.cellSize, transform.rotation, layerMaskFurniture);
+    //        if (isInFurniture)
+    //        {
+    //            ds.GetComponent<Renderer>().material.color = Color.blue;
+    //            debugSpheresInsideFurniture.Add(ds);
+    //        }
+    //    }
 
-        canUpdateFurnitureSpawnPointPositions = debugSpheresInsideFurniture.Count > 0;
-    }
+    //    canUpdateFurnitureSpawnPointPositions = debugSpheresInsideFurniture.Count > 0;
+    //}
 
     private bool IsInsideRoom(Vector3 position)
     {

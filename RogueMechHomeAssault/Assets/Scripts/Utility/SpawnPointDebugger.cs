@@ -24,6 +24,7 @@ public class SpawnPointDebugger : MonoBehaviour
     private List<GameObject> spawnPointsFurniture;
     private bool canStartPlacingPointsOnSurfaces = false;
 
+    private const string TAG_FLOOR = "TagFloor";
     private const string TAG_FURNITURE = "TagFurniture";
 
     private void Start()
@@ -105,7 +106,7 @@ public class SpawnPointDebugger : MonoBehaviour
                 {
                     ds.transform.position = hit.point;
 
-                    if (hit.transform.tag == "TagFloor")
+                    if (hit.transform.tag == TAG_FLOOR)
                     {
                         ds.GetComponent<Renderer>().material.color = Color.blue;
                         spawnPointsFloor.Add(ds);
@@ -127,7 +128,7 @@ public class SpawnPointDebugger : MonoBehaviour
 
     private void TrimPointsOnFloor()
     {
-        var floor = GameObject.FindGameObjectWithTag("TagFloor");
+        var floor = GameObject.FindGameObjectWithTag(TAG_FLOOR);
         if (!floor) return;
         
         var cube = CreateTrimmerFromRoomElement(floor);
@@ -229,60 +230,46 @@ public class SpawnPointDebugger : MonoBehaviour
 
     private GameObject CreateTrimmerFromRoomElement(GameObject roomElement)
     {
-        var mesh = roomElement.gameObject.GetComponent<MeshFilter>().mesh;
-        if (!mesh) return null;
-
         bool isFurniture = roomElement.tag == TAG_FURNITURE;
         float padding = isFurniture ? trimPaddingFloor : -trimPaddingFloor;
-
-        var floorSize = mesh.bounds.size;
-        var floorScaleX = roomElement.transform.localScale.x;
-        var floorScaleZ = roomElement.transform.localScale.z;
-
-        var scaleX = floorSize.x * floorScaleX + padding;
-        var scaleZ = floorSize.z * floorScaleZ + padding;
-
-        var cube = Instantiate(prefabCubeTrimmer);
-        cube.GetComponent<Renderer>().material = materialTrimmer;
-        cube.transform.position = roomElement.transform.position;
-        cube.transform.localScale = new Vector3(scaleX, 1f, scaleZ);
-        cube.AddComponent<BoxCollider>();
-        return cube;
+        return CreateTrimmer(roomElement, padding);
     }
     
     private GameObject CreateTrimmerOnFurniture(GameObject furniture)
     {
-        var mesh = furniture.gameObject.GetComponent<MeshFilter>().mesh;
+        return CreateTrimmer(furniture, -trimPaddingFurniture, false);
+    }
+
+    private GameObject CreateTrimmer(GameObject roomElement, float padding, bool isOnFloor = true)
+    {
+        var mesh = roomElement.gameObject.GetComponent<MeshFilter>().mesh;
         if (!mesh) return null;
 
-        var furnitureSize = mesh.bounds.size;
-        var furnitureScaleX = furniture.transform.localScale.x;
-        var furnitureScaleZ = furniture.transform.localScale.z;
+        var roomElementSize = mesh.bounds.size;
+        var roomElementScaleX = roomElement.transform.localScale.x;
+        var roomElementScaleZ = roomElement.transform.localScale.z;
 
-        var scaleX = furnitureSize.x * furnitureScaleX - trimPaddingFurniture;
-        var scaleZ = furnitureSize.z * furnitureScaleZ - trimPaddingFurniture;
+        var scaleX = roomElementSize.x * roomElementScaleX + padding;
+        var scaleZ = roomElementSize.z * roomElementScaleZ + padding;
 
         var cube = Instantiate(prefabCubeTrimmer);
         cube.GetComponent<Renderer>().material = materialTrimmer;
 
-        var furniturePos = furniture.transform.position;
-        furniturePos.y += (furnitureSize.y / 2f);
-        cube.transform.position = furniturePos;
+        if (isOnFloor)
+        {
+            cube.transform.position = roomElement.transform.position;
+        }
+        else
+        {
+            var roomElementPos = roomElement.transform.position;
+            roomElementPos.y += (roomElementSize.y / 2f);
+            cube.transform.position = roomElementPos;
+        }
+
         cube.transform.localScale = new Vector3(scaleX, 1f, scaleZ);
         cube.AddComponent<BoxCollider>();
+
         return cube;
-    }
-
-
-    private bool IsInsideRoom(Vector3 position)
-    {
-        bool isHittingTheFloor = Physics.Raycast(position, Vector3.down, Mathf.Infinity);
-        return isHittingTheFloor;
-    }
-
-    private bool IsInsideFurniture(Vector3 position)
-    {
-        return Physics.CheckBox(position, grid.cellSize, transform.rotation);
     }
 
     private void AddDebugSphere(Vector3 pos)

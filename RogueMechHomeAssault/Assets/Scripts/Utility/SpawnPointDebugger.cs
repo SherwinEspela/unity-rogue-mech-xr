@@ -1,11 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
 
 public class SpawnPointDebugger : MonoBehaviour
 {
     [SerializeField] Grid grid;
+    [SerializeField] GameObject prefabCubeTrimmer;
     [SerializeField] float gridCellSize = 0.1f;
     [SerializeField] float gridCellGap = 0.02f;
     [SerializeField] int gridStart = -50;
@@ -143,6 +143,9 @@ public class SpawnPointDebugger : MonoBehaviour
             }
         }
 
+        spawnPointsFloor.Clear();
+        spawnPointsFloor = remainingSpawnPoints;
+
         DestroyImmediate(cube);
 
         var furnitures = GameObject.FindGameObjectsWithTag(TAG_FURNITURE);
@@ -162,19 +165,24 @@ public class SpawnPointDebugger : MonoBehaviour
 
         var cube = CreateTrimmerFromRoomElement(furniture);
 
-        //var remainingSpawnPoints = new List<GameObject>();
-        //foreach (var sp in spawnPointsFloor)
-        //{
-        //    bool isInsideCube = IsInsideTrimmer(sp.transform.position);
-        //    if (isInsideCube)
-        //    {
-        //        DestroyImmediate(sp);
-        //    }
-        //    else
-        //    {
-        //        remainingSpawnPoints.Add(sp);
-        //    }
-        //}
+        var remainingSpawnPoints = new List<GameObject>();
+        foreach (var sp in spawnPointsFloor)
+        {
+            bool isInsideCube = IsInsideTrimmer(sp.transform.position);
+            if (isInsideCube)
+            {
+                DestroyImmediate(sp);
+            }
+            else
+            {
+                remainingSpawnPoints.Add(sp);
+            }
+        }
+
+        spawnPointsFloor.Clear();
+        spawnPointsFloor = remainingSpawnPoints;
+
+        DestroyImmediate(cube);
     }
 
     private bool IsInsideTrimmer(Vector3 position)
@@ -197,9 +205,7 @@ public class SpawnPointDebugger : MonoBehaviour
         var scaleX = floorSize.x * floorScaleX + padding;
         var scaleZ = floorSize.z * floorScaleZ + padding;
 
-        var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        var bx = cube.GetComponent<BoxCollider>();
-        if (bx) DestroyImmediate(bx);
+        var cube = Instantiate(prefabCubeTrimmer);
         cube.GetComponent<Renderer>().material = materialTrimmer;
         cube.transform.position = roomElement.transform.position;
         cube.transform.localScale = new Vector3(scaleX, 1f, scaleZ);

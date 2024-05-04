@@ -882,6 +882,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   grid: {fileID: 1035058982}
+  prefabCubeTrimmer: {fileID: 708087342552004843, guid: 28c5c76dc44beb24b9a1878379b3c2f3,
+    type: 3}
   gridCellSize: 0.1
   gridCellGap: 0.02
   gridStart: -50
@@ -896,8 +898,9 @@ MonoBehaviour:
     m_Bits: 64
   layerMaskTrimmer:
     serializedVersion: 2
-    m_Bits: 1
+    m_Bits: 128
   materialTrimmer: {fileID: 2100000, guid: 141d3c77bd2775040b755e9a12962f34, type: 2}
+  trimPadding: 0.5
 --- !u!4 &1035058984
 Transform:
   m_ObjectHideFlags: 0
@@ -1140,7 +1143,7 @@ GameObject:
   - component: {fileID: 1716342670}
   - component: {fileID: 1716342669}
   m_Layer: 6
-  m_Name: PlaneFoor
+  m_Name: PlaneFloor
   m_TagString: TagFloor
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

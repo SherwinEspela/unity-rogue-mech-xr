@@ -16,7 +16,8 @@ public class SpawnPointDebugger : MonoBehaviour
     [SerializeField] LayerMask layerMaskFloor;
     [SerializeField] LayerMask layerMaskTrimmer;
     [SerializeField] Material materialTrimmer;
-    [SerializeField] float trimPadding = 0.5f;
+    [SerializeField] float trimPaddingFloor = 0.5f;
+    [SerializeField] float trimPaddingFurniture = 0.5f;
 
     private List<GameObject> debugSpheres;
     private List<GameObject> spawnPointsFloor;
@@ -120,6 +121,7 @@ public class SpawnPointDebugger : MonoBehaviour
             canStartPlacingPointsOnSurfaces = false;
 
             TrimPointsOnFloor();
+            TrimPointsOnFurnitures();
         }
     }
 
@@ -185,6 +187,41 @@ public class SpawnPointDebugger : MonoBehaviour
         DestroyImmediate(cube);
     }
 
+    private void TrimPointsOnFurnitures()
+    {
+        var furnitures = GameObject.FindGameObjectsWithTag(TAG_FURNITURE);
+        if (furnitures.Length == 0) return;
+
+        var trimmers = new List<GameObject>();
+        foreach (var furniture in furnitures)
+        {
+            var trimmer = CreateTrimmerOnFurniture(furniture);
+            trimmers.Add(trimmer);
+        }
+
+        var remainingSpawnPoints = new List<GameObject>();
+        foreach (var sp in spawnPointsFurniture)
+        {
+            bool isInsideCube = IsInsideTrimmer(sp.transform.position);
+            if (isInsideCube)
+            {
+                remainingSpawnPoints.Add(sp);
+            }
+            else
+            {
+                DestroyImmediate(sp);
+            }
+        }
+
+        spawnPointsFurniture.Clear();
+        spawnPointsFurniture = remainingSpawnPoints;
+
+        foreach (var trimmer in trimmers)
+        {
+            DestroyImmediate(trimmer);
+        }
+    }
+
     private bool IsInsideTrimmer(Vector3 position)
     {
         return Physics.CheckBox(position, grid.cellSize / 2f, transform.rotation, layerMaskTrimmer);
@@ -195,12 +232,12 @@ public class SpawnPointDebugger : MonoBehaviour
         var mesh = roomElement.gameObject.GetComponent<MeshFilter>().mesh;
         if (!mesh) return null;
 
+        bool isFurniture = roomElement.tag == TAG_FURNITURE;
+        float padding = isFurniture ? trimPaddingFloor : -trimPaddingFloor;
+
         var floorSize = mesh.bounds.size;
         var floorScaleX = roomElement.transform.localScale.x;
         var floorScaleZ = roomElement.transform.localScale.z;
-
-        bool isFurniture = roomElement.tag == TAG_FURNITURE;
-        float padding = isFurniture ? trimPadding : -trimPadding;
 
         var scaleX = floorSize.x * floorScaleX + padding;
         var scaleZ = floorSize.z * floorScaleZ + padding;
@@ -212,6 +249,30 @@ public class SpawnPointDebugger : MonoBehaviour
         cube.AddComponent<BoxCollider>();
         return cube;
     }
+    
+    private GameObject CreateTrimmerOnFurniture(GameObject furniture)
+    {
+        var mesh = furniture.gameObject.GetComponent<MeshFilter>().mesh;
+        if (!mesh) return null;
+
+        var furnitureSize = mesh.bounds.size;
+        var furnitureScaleX = furniture.transform.localScale.x;
+        var furnitureScaleZ = furniture.transform.localScale.z;
+
+        var scaleX = furnitureSize.x * furnitureScaleX - trimPaddingFurniture;
+        var scaleZ = furnitureSize.z * furnitureScaleZ - trimPaddingFurniture;
+
+        var cube = Instantiate(prefabCubeTrimmer);
+        cube.GetComponent<Renderer>().material = materialTrimmer;
+
+        var furniturePos = furniture.transform.position;
+        furniturePos.y += (furnitureSize.y / 2f);
+        cube.transform.position = furniturePos;
+        cube.transform.localScale = new Vector3(scaleX, 1f, scaleZ);
+        cube.AddComponent<BoxCollider>();
+        return cube;
+    }
+
 
     private bool IsInsideRoom(Vector3 position)
     {

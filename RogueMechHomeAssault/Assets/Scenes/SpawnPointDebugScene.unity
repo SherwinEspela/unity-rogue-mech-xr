@@ -900,7 +900,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 128
   materialTrimmer: {fileID: 2100000, guid: 141d3c77bd2775040b755e9a12962f34, type: 2}
-  trimPadding: 0.5
+  trimPaddingFloor: 0.5
+  trimPaddingFurniture: 0.25
 --- !u!4 &1035058984
 Transform:
   m_ObjectHideFlags: 0

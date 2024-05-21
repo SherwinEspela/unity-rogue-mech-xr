@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class SpawnPointDebugger : MonoBehaviour
 {
@@ -22,10 +23,18 @@ public class SpawnPointDebugger : MonoBehaviour
     private List<GameObject> debugSpheres;
     private List<GameObject> spawnPointsFloor;
     private List<GameObject> spawnPointsFurniture;
+    private List<Vector3> spawnPoints;
     private bool canStartPlacingPointsOnSurfaces = false;
 
     private const string TAG_FLOOR = "TagFloor";
     private const string TAG_FURNITURE = "TagFurniture";
+
+    public Vector3 RandomSpawnPoint
+    {
+        get { return spawnPoints[Random.Range(0, spawnPoints.Count - 1)]; }
+    }
+
+    public UnityAction OnSpawnPointPlacementCompleted;
 
     private void Start()
     {
@@ -221,6 +230,19 @@ public class SpawnPointDebugger : MonoBehaviour
         {
             DestroyImmediate(trimmer);
         }
+
+        spawnPoints = new List<Vector3>();
+        foreach (var go in spawnPointsFloor)
+        {
+            spawnPoints.Add(go.transform.position);
+        }
+
+        foreach (var go in spawnPointsFurniture)
+        {
+            spawnPoints.Add(go.transform.position);
+        }
+
+        OnSpawnPointPlacementCompleted?.Invoke();
     }
 
     private bool IsInsideTrimmer(Vector3 position)

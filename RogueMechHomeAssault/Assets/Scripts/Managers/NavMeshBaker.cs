@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Events;
 
 public class NavMeshBaker : MonoBehaviour
 {
@@ -10,7 +11,9 @@ public class NavMeshBaker : MonoBehaviour
     private const string TAG_FLOOR = "TagFloor";
     private const string TAG_FURNITURE = "TagFurniture";
 
-    void Start()
+    public UnityAction OnNavMeshBakingComplete;
+
+    void Awake()
     {
         var floors = GameObject.FindGameObjectsWithTag(TAG_FLOOR);
         if (floors.Length > 0)
@@ -36,6 +39,8 @@ public class NavMeshBaker : MonoBehaviour
                 {
                     nvs.BuildNavMesh();
                 }
+
+                OnNavMeshBakingComplete?.Invoke();
             }
         }
     }

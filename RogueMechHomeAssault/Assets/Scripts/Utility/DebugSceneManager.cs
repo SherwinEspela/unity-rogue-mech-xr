@@ -6,16 +6,33 @@ public class DebugSceneManager : MonoBehaviour
 {
     [SerializeField] SpawnPointDebugger spawnPointDebugger;
     [SerializeField] Pistol[] testWeapons;
+    [SerializeField] NavMeshBaker navMeshBaker;
+    [SerializeField] PoolManager poolManager;
+
+    private Mech currentMech;
 
     void Start()
     {
         spawnPointDebugger.OnSpawnPointPlacementCompleted += HandleSpawnPointPlacementCompleted;
+        navMeshBaker.OnNavMeshBakingComplete += HandleNavMeshBakingCompleted;
     }
 
     private void HandleSpawnPointPlacementCompleted()
     {
-        Debug.Log("HandleSpawnPointPlacementCompleted....");
         PlaceWeapons();
+
+        currentMech = poolManager.SpawnMech();
+        currentMech.OnDestinationReached += HandleMechDestinationReached;
+
+        var randomPos = spawnPointDebugger.RandomSpawnPoint;
+        currentMech.transform.position = randomPos;
+
+        var destination = spawnPointDebugger.RandomSpawnPoint;
+        currentMech.MoveTo(destination);
+    }
+
+    private void HandleNavMeshBakingCompleted()
+    {
     }
 
     private void PlaceWeapons()
@@ -26,5 +43,11 @@ public class DebugSceneManager : MonoBehaviour
         {
             tw.transform.position = spawnPointDebugger.RandomSpawnPoint;
         }
+    }
+
+    private void HandleMechDestinationReached()
+    {
+        var destination = spawnPointDebugger.RandomSpawnPoint;
+        currentMech.MoveTo(destination);
     }
 }

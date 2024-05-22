@@ -7,10 +7,15 @@ using UnityEngine.Events;
 public class Mech : MonoBehaviour
 {
     [SerializeField] NavMeshAgent agent;
+    [SerializeField] Animator animator;
+
     [SerializeField] float walkSpeed = 1.0f;
 
     private bool isWalking = false;
     private Vector3 currentDestination;
+
+    private const string TRIGGER_WALK = "TriggerWalk";
+    private const string TRIGGER_IDLE = "TriggerIdle";
 
     public UnityAction OnDestinationReached;
 
@@ -23,12 +28,13 @@ public class Mech : MonoBehaviour
     {
         if (position == currentDestination)
         {
-            OnDestinationReached?.Invoke();
+            DestinationReached();
             return;
         }
 
         currentDestination = position;
         isWalking = true;
+        animator.SetTrigger(TRIGGER_WALK);
         agent.SetDestination(position);
     }
 
@@ -36,20 +42,29 @@ public class Mech : MonoBehaviour
     {
         if (isWalking)
         {
-            if (agent.remainingDistance <= agent.stoppingDistance)
+            //if (agent.remainingDistance <= agent.stoppingDistance)
+            //{
+            //    if (!agent.hasPath || agent.velocity.sqrMagnitude == 0.0f)
+            //    {
+            //        DestinationReached();
+            //    }
+            //}
+
+            //var distance = Vector3.Distance(this.transform.position, currentDestination);
+            //Debug.Log($"distance value = {distance}");
+
+            if (Vector3.Distance(this.transform.position, currentDestination) <= 1.0f)
             {
-                if (!agent.hasPath || agent.velocity.sqrMagnitude == 0f)
-                {
-                    Debug.Log("Agent has reached its destination!");
-                    isWalking = false;
-                    DestinationReached();
-                }
+                DestinationReached();
             }
         }
     }
 
     private void DestinationReached()
     {
+        isWalking = false;
+        animator.SetTrigger(TRIGGER_IDLE);
+
         OnDestinationReached?.Invoke();
     }
 }

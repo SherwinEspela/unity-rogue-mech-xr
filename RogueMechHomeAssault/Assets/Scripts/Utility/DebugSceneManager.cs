@@ -26,9 +26,7 @@ public class DebugSceneManager : MonoBehaviour
 
         var randomPos = spawnPointDebugger.RandomSpawnPoint;
         currentMech.transform.position = randomPos;
-
-        var destination = spawnPointDebugger.RandomSpawnPoint;
-        currentMech.MoveTo(destination);
+        SetNewDestination();
     }
 
     private void HandleNavMeshBakingCompleted()
@@ -46,6 +44,11 @@ public class DebugSceneManager : MonoBehaviour
     }
 
     private void HandleMechDestinationReached()
+    {
+        Invoke("SetNewDestination", Random.Range(2.0f, 5.0f));
+    }
+
+    private void SetNewDestination()
     {
         var destination = spawnPointDebugger.RandomSpawnPoint;
         currentMech.MoveTo(destination);

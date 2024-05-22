@@ -1229,6 +1229,8 @@ GameObject:
   - component: {fileID: 7259579254418544035}
   - component: {fileID: 427575597823437309}
   - component: {fileID: 4278666190036840057}
+  - component: {fileID: 7728049984966534300}
+  - component: {fileID: 8415699903339541723}
   m_Layer: 0
   m_Name: RogueMech_Lt
   m_TagString: Enemy
@@ -1290,7 +1292,7 @@ MonoBehaviour:
   sfxImpact: {fileID: 427575597823437309}
   audioClipImpact: {fileID: 8300000, guid: 869814b967f347648ab18c56142d01c9, type: 3}
   audioClipDestroyed: {fileID: 8300000, guid: 59cfd7b9983c76047831bead937dd980, type: 3}
-  HealthMax: 100
+  healthMax: 100
 --- !u!82 &427575597823437309
 AudioSource:
   m_ObjectHideFlags: 0
@@ -1409,6 +1411,41 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 2.1034145, y: 1.6302919, z: 1.778785}
   m_Center: {x: -0.028550774, y: 2.5891912, z: -0.043233037}
+--- !u!195 &7728049984966534300
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6465495530693635374}
+  m_Enabled: 1
+  m_AgentTypeID: 0
+  m_Radius: 0.5
+  m_Speed: 3.5
+  m_Acceleration: 8
+  avoidancePriority: 50
+  m_AngularSpeed: 120
+  m_StoppingDistance: 0
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 2
+  m_BaseOffset: 0
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 4
+--- !u!114 &8415699903339541723
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6465495530693635374}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a4083d2fa5c2ac4a8e01dd5f709fa24, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  agent: {fileID: 7728049984966534300}
 --- !u!1 &6517505768705302501
 GameObject:
   m_ObjectHideFlags: 0

@@ -1269,7 +1269,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   agent: {fileID: 7728049984966534300}
   animator: {fileID: 4915368936407008372}
-  walkSpeed: 0.5
+  walkSpeed: 0.1
 --- !u!114 &7259579254418544035
 MonoBehaviour:
   m_ObjectHideFlags: 0

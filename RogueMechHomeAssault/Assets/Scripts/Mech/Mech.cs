@@ -18,6 +18,7 @@ public class Mech : MonoBehaviour
     private const string TRIGGER_IDLE = "TriggerIdle";
 
     public UnityAction OnDestinationReached;
+    public UnityAction<Mech> OnMechDestinationReached;
 
     private void Awake()
     {
@@ -57,6 +58,7 @@ public class Mech : MonoBehaviour
         isWalking = false;
         animator.SetTrigger(TRIGGER_IDLE);
 
-        OnDestinationReached?.Invoke();
+        //OnDestinationReached?.Invoke();
+        OnMechDestinationReached?.Invoke(this);
     }
 }

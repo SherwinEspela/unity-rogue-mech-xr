@@ -35,6 +35,11 @@ public class SpawnPointGenerator : MonoBehaviour
         get { return spawnPoints[Random.Range(0, spawnPoints.Count - 1)]; }
     }
 
+    public List<Vector3> SpawnPoints
+    {
+        get { return spawnPoints; }
+    }
+
     public List<GameObject> SpawnPointsOnFloor
     {
         get { return spawnPointsFloor; }

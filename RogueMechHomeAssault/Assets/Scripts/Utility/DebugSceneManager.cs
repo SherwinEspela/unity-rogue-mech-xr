@@ -4,30 +4,24 @@ using UnityEngine;
 
 public class DebugSceneManager : MonoBehaviour
 {
-    [SerializeField] SpawnPointGenerator spawnPointDebugger;
+    [SerializeField] SpawnPointGenerator spawnPointGenerator;
     [SerializeField] Pistol[] testWeapons;
     [SerializeField] NavMeshBaker navMeshBaker;
     [SerializeField] PoolManager poolManager;
-    [SerializeField] FurnitureEdgeFinder furnitureSpawnPointsEdgeChecker;
-
-    private Mech currentMech;
+    [SerializeField] FurnitureEdgeFinder furnitureEdgeFinder;
+    [SerializeField] EnemySpawner enemySpawner;
 
     void Start()
     {
-        spawnPointDebugger.OnSpawnPointPlacementCompleted += HandleSpawnPointPlacementCompleted;
+        spawnPointGenerator.OnSpawnPointPlacementCompleted += HandleSpawnPointPlacementCompleted;
         navMeshBaker.OnNavMeshBakingComplete += HandleNavMeshBakingCompleted;
+        furnitureEdgeFinder.OnFurnitureEdgesFound += HandleFurnitureEdgesFound;
     }
 
     private void HandleSpawnPointPlacementCompleted()
     {
         PlaceWeapons();
-
-        currentMech = poolManager.SpawnMech();
-        currentMech.OnDestinationReached += HandleMechDestinationReached;
-
-        var randomPos = spawnPointDebugger.RandomSpawnPoint;
-        currentMech.transform.position = randomPos;
-        SetNewDestination();
+        enemySpawner.SetSpawnPoints(spawnPointGenerator.SpawnPoints);
 
         // FIXME: Physics Raycasting on instantiated game objects only
         // works when invoking it is delayed.
@@ -36,15 +30,20 @@ public class DebugSceneManager : MonoBehaviour
 
     private void ScanEdges()
     {
-        var furniturePoints = spawnPointDebugger.SpawnPointsOnFurniture;
+        var furniturePoints = spawnPointGenerator.SpawnPointsOnFurniture;
         if (furniturePoints.Count > 0)
         {
-            furnitureSpawnPointsEdgeChecker.FindEdges(furniturePoints);
+            furnitureEdgeFinder.FindEdges(furniturePoints);
         }
     }
 
     private void HandleNavMeshBakingCompleted()
     {
+    }
+
+    private void HandleFurnitureEdgesFound()
+    {
+        enemySpawner.SpawnEnemy();
     }
 
     private void PlaceWeapons()
@@ -53,18 +52,18 @@ public class DebugSceneManager : MonoBehaviour
 
         foreach (var tw in testWeapons)
         {
-            tw.transform.position = spawnPointDebugger.RandomSpawnPoint;
+            tw.transform.position = spawnPointGenerator.RandomSpawnPoint;
         }
     }
 
-    private void HandleMechDestinationReached()
-    {
-        Invoke("SetNewDestination", Random.Range(2.0f, 5.0f));
-    }
+    //private void HandleMechDestinationReached()
+    //{
+    //    Invoke("SetNewDestination", Random.Range(2.0f, 5.0f));
+    //}
 
-    private void SetNewDestination()
-    {
-        var destination = spawnPointDebugger.RandomSpawnPoint;
-        currentMech.MoveTo(destination);
-    }
+    //private void SetNewDestination()
+    //{
+    //    var destination = spawnPointGenerator.RandomSpawnPoint;
+    //    currentMech.MoveTo(destination);
+    //}
 }

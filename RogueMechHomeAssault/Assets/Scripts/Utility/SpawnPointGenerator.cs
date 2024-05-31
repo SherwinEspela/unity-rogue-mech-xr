@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
-public class SpawnPointDebugger : MonoBehaviour
+public class SpawnPointGenerator : MonoBehaviour
 {
     [SerializeField] Grid grid;
     [SerializeField] GameObject prefabCubeTrimmer;
+    [SerializeField] GameObject prefabSpawnPoint;
     [SerializeField] float gridCellSize = 0.1f;
     [SerializeField] float gridCellGap = 0.02f;
     [SerializeField] int gridStart = -50;
@@ -32,6 +33,16 @@ public class SpawnPointDebugger : MonoBehaviour
     public Vector3 RandomSpawnPoint
     {
         get { return spawnPoints[Random.Range(0, spawnPoints.Count - 1)]; }
+    }
+
+    public List<GameObject> SpawnPointsOnFloor
+    {
+        get { return spawnPointsFloor; }
+    }
+
+    public List<GameObject> SpawnPointsOnFurniture
+    {
+        get { return spawnPointsFurniture; }
     }
 
     public UnityAction OnSpawnPointPlacementCompleted;
@@ -63,7 +74,7 @@ public class SpawnPointDebugger : MonoBehaviour
             {
                 Vector3Int cell = new Vector3Int(i, (int)(transform.position.y), j);
                 Vector3 worldPos = grid.CellToWorld(cell);
-                AddDebugSphere(worldPos);
+                AddSpawnPoint(worldPos, $"spawnPoint-{i}{j}");
             }
         }
     }
@@ -294,17 +305,14 @@ public class SpawnPointDebugger : MonoBehaviour
         return cube;
     }
 
-    private void AddDebugSphere(Vector3 pos)
+    private void AddSpawnPoint(Vector3 pos, string name)
     {
-        var sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        sphere.transform.localScale = Vector3.one * debugSphereSize;
-        sphere.GetComponent<Renderer>().material.color = colorDebugSphere;
-        var bc = sphere.GetComponent<BoxCollider>();
-        if (bc) bc.enabled = false;
-        sphere.transform.SetParent(this.transform);
-        sphere.transform.position = pos;
-        sphere.name = "DebugSphere";
-  
-        debugSpheres.Add(sphere);
+        var sp = Instantiate(prefabSpawnPoint);
+        sp.transform.localScale = Vector3.one * debugSphereSize;
+        sp.GetComponent<Renderer>().material.color = colorDebugSphere;
+        sp.transform.SetParent(this.transform);
+        sp.transform.position = pos;
+        sp.name = name;
+        debugSpheres.Add(sp);
     }
 }

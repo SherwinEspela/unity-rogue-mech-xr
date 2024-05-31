@@ -4,10 +4,11 @@ using UnityEngine;
 
 public class DebugSceneManager : MonoBehaviour
 {
-    [SerializeField] SpawnPointDebugger spawnPointDebugger;
+    [SerializeField] SpawnPointGenerator spawnPointDebugger;
     [SerializeField] Pistol[] testWeapons;
     [SerializeField] NavMeshBaker navMeshBaker;
     [SerializeField] PoolManager poolManager;
+    [SerializeField] FurnitureEdgeFinder furnitureSpawnPointsEdgeChecker;
 
     private Mech currentMech;
 
@@ -27,6 +28,19 @@ public class DebugSceneManager : MonoBehaviour
         var randomPos = spawnPointDebugger.RandomSpawnPoint;
         currentMech.transform.position = randomPos;
         SetNewDestination();
+
+        // FIXME: Physics Raycasting on instantiated game objects only
+        // works when invoking it is delayed.
+        Invoke("ScanEdges", 0.001f);
+    }
+
+    private void ScanEdges()
+    {
+        var furniturePoints = spawnPointDebugger.SpawnPointsOnFurniture;
+        if (furniturePoints.Count > 0)
+        {
+            furnitureSpawnPointsEdgeChecker.FindEdges(furniturePoints);
+        }
     }
 
     private void HandleNavMeshBakingCompleted()

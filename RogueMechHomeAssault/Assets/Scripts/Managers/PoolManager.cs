@@ -4,26 +4,23 @@ using UnityEngine;
 
 public class PoolManager : MonoBehaviour
 {
-    [SerializeField] Mech[] mechsToPool;
+    private Queue<Mech> mechsPool;
 
-    private Queue<Mech> mechs;
-
-    private void Awake()
+    public void Initialize(List<Mech> poolingMech)
     {
-        if (mechsToPool.Length == 0) return;
+        mechsPool = new Queue<Mech>();
 
-        mechs = new Queue<Mech>();
-
-        foreach (var mech in mechsToPool)
+        foreach (var mech in poolingMech)
         {
             mech.gameObject.SetActive(false);
-            mechs.Enqueue(mech); 
+            mech.transform.position = Vector3.zero;
+            mechsPool.Enqueue(mech);
         }
     }
 
     public Mech SpawnMech()
     {
-        var mech = mechs.Dequeue();
+        var mech = mechsPool.Dequeue();
         mech.gameObject.SetActive(true);
         return mech;
     }

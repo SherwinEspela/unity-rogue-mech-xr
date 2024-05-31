@@ -55,15 +55,4 @@ public class DebugSceneManager : MonoBehaviour
             tw.transform.position = spawnPointGenerator.RandomSpawnPoint;
         }
     }
-
-    //private void HandleMechDestinationReached()
-    //{
-    //    Invoke("SetNewDestination", Random.Range(2.0f, 5.0f));
-    //}
-
-    //private void SetNewDestination()
-    //{
-    //    var destination = spawnPointGenerator.RandomSpawnPoint;
-    //    currentMech.MoveTo(destination);
-    //}
 }

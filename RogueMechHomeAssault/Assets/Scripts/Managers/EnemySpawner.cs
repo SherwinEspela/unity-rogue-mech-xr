@@ -5,15 +5,20 @@ using UnityEngine.Events;
 
 public class EnemySpawner : MonoBehaviour
 {
-    [SerializeField] int totalEnemies = 5;
+    [SerializeField] List<Mech> mechPool;
     [SerializeField] PoolManager poolManager;
 
     private List<Vector3> spawnPoints;
     private List<Mech> mechs;
 
+    [Range(1, 5)]
+    [SerializeField]
+    int totalEnemies = 5;
+
     private void Start()
     {
         mechs = new List<Mech>();
+        poolManager.Initialize(mechPool);
     }
 
     private Vector3 GetRandomSpawnPoint()
@@ -37,6 +42,8 @@ public class EnemySpawner : MonoBehaviour
         if (mechs.Count >= totalEnemies) return;
 
         var mech = poolManager.SpawnMech();
+        mech.gameObject.SetActive(true);
+        mech.transform.position = Vector3.zero;
         mech.OnMechDestinationReached += HandleMechDestinationReached;
 
         var randomPos = GetRandomSpawnPoint();

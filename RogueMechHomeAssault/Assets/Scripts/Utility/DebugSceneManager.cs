@@ -20,7 +20,7 @@ public class DebugSceneManager : MonoBehaviour
 
     private void HandleSpawnPointPlacementCompleted()
     {
-        PlaceWeapons();
+        //PlaceWeapons();
         enemySpawner.SetSpawnPoints(spawnPointGenerator.SpawnPoints);
 
         // FIXME: Physics Raycasting on instantiated game objects only

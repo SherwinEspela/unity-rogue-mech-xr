@@ -10,6 +10,12 @@ public class DebugSceneManager : MonoBehaviour
     [SerializeField] PoolManager poolManager;
     [SerializeField] FurnitureEdgeFinder furnitureEdgeFinder;
     [SerializeField] EnemySpawner enemySpawner;
+    [SerializeField] DummyPlayer dummyPlayer;
+
+    private void Awake()
+    {
+        dummyPlayer.gameObject.SetActive(false);
+    }
 
     void Start()
     {
@@ -43,6 +49,8 @@ public class DebugSceneManager : MonoBehaviour
 
     private void HandleFurnitureEdgesFound()
     {
+        dummyPlayer.gameObject.SetActive(true);
+        dummyPlayer.Init();
         enemySpawner.SpawnEnemy();
     }
 

@@ -31,7 +31,7 @@ public class RoomManager : MonoBehaviour
             return;
         }
 
-        sceneDebugger.PrintMessage(LogMessageHelper.GetMessages("Start..."));
+        //sceneDebugger.PrintMessage(LogMessageHelper.GetMessages("Start..."));
 
         if (sceneManager == null) sceneManager = GameObject.FindFirstObjectByType<OVRSceneManager>();
         sceneManager.SceneModelLoadedSuccessfully += OnSceneLoaded;
@@ -43,12 +43,12 @@ public class RoomManager : MonoBehaviour
 
     private void OnSceneLoaded()
     {
-        sceneDebugger.PrintMessage(LogMessageHelper.GetMessages("OnSceneLoaded..."));
+        //sceneDebugger.PrintMessage(LogMessageHelper.GetMessages("OnSceneLoaded..."));
 
         sceneRoom = GameObject.FindFirstObjectByType<OVRSceneRoom>();
         if (sceneRoom == null) return;
 
-        sceneDebugger.PrintMessage(LogMessageHelper.GetMessages("scene room is not null..."));
+        //sceneDebugger.PrintMessage(LogMessageHelper.GetMessages("scene room is not null..."));
 
         //// setup room box collider
         float height = sceneRoom.Walls[0].Height;
@@ -161,13 +161,13 @@ public class RoomManager : MonoBehaviour
 
     private void DebugAvailableLocations()
     {
-        sceneDebugger.PrintMessage(LogMessageHelper.GetMessages("DebugAvailableLocations..."));
+        //sceneDebugger.PrintMessage(LogMessageHelper.GetMessages("DebugAvailableLocations..."));
 
         List<Vector3> availableLocations = GetAvailableSpawnLocations();
         if (availableLocations.Count == 0) return;
 
         string countMessage = $"availableLocations count ==== {availableLocations.Count}";
-        sceneDebugger.PrintMessage(LogMessageHelper.GetMessages(countMessage));
+        //sceneDebugger.PrintMessage(LogMessageHelper.GetMessages(countMessage));
 
         Gizmos.color = Color.green;
         foreach (Vector3 pos in availableLocations)

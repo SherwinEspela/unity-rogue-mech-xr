@@ -73,6 +73,11 @@ public class Mech : MonoBehaviour
 
     void Update()
     {
+        UpdateMechMovement();
+    }
+
+    private void UpdateMechMovement()
+    {
         switch (mechActionState)
         {
             case MechActionState.Idle:
@@ -87,7 +92,8 @@ public class Mech : MonoBehaviour
                 if (Vector3.Distance(this.transform.position, Player.transform.position) <= 2.0f)
                 {
                     DestinationReached();
-                } else
+                }
+                else
                 {
                     agent.SetDestination(Player.transform.position);
                 }

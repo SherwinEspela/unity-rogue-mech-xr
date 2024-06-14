@@ -15,6 +15,8 @@ public class EnemySpawner : MonoBehaviour
     [SerializeField]
     int totalEnemies = 5;
 
+    public PlayerCharacter Player { get; set; }
+
     private void Start()
     {
         mechs = new List<Mech>();
@@ -44,7 +46,8 @@ public class EnemySpawner : MonoBehaviour
         var mech = poolManager.SpawnMech();
         mech.gameObject.SetActive(true);
         mech.transform.position = Vector3.zero;
-        mech.OnMechDestinationReached += HandleMechDestinationReached;
+        mech.Player = Player;
+        mech.OnMechEvaded += HandleMechEvaded;
 
         var randomPos = GetRandomSpawnPoint();
         mech.transform.position = randomPos;
@@ -61,7 +64,7 @@ public class EnemySpawner : MonoBehaviour
         SpawnEnemy();
     }
 
-    private void HandleMechDestinationReached(Mech mech)
+    private void HandleMechEvaded(Mech mech)
     {
         SetNewDestination(mech);
     }

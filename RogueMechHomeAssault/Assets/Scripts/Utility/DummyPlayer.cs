@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class DummyPlayer : MonoBehaviour
+public class DummyPlayer : PlayerCharacter
 {
     [SerializeField] PlayerInput playerInput;
     [SerializeField] float speedMult = 2.0f;

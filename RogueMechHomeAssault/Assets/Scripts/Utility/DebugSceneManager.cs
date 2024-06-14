@@ -51,6 +51,7 @@ public class DebugSceneManager : MonoBehaviour
     {
         dummyPlayer.gameObject.SetActive(true);
         dummyPlayer.Init();
+        enemySpawner.Player = dummyPlayer;
         enemySpawner.SpawnEnemy();
     }
 

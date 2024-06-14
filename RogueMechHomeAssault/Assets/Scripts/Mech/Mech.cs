@@ -1,8 +1,13 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Events;
+
+public enum MechActionState
+{
+    Idle, 
+    Evading,
+    Attacking
+}
 
 public class Mech : MonoBehaviour
 {
@@ -11,14 +16,17 @@ public class Mech : MonoBehaviour
 
     [SerializeField] float walkSpeed = 1.0f;
 
-    private bool isWalking = false;
     private Vector3 currentDestination;
+    private MechActionState mechActionState = MechActionState.Idle;
 
     private const string TRIGGER_WALK = "TriggerWalk";
     private const string TRIGGER_IDLE = "TriggerIdle";
 
+    public PlayerCharacter Player { get; set; }
+
     public UnityAction OnDestinationReached;
     public UnityAction<Mech> OnMechDestinationReached;
+    public UnityAction<Mech> OnMechEvaded;
 
     private void Awake()
     {
@@ -35,30 +43,85 @@ public class Mech : MonoBehaviour
         }
 
         currentDestination = position;
-        isWalking = true;
+        mechActionState = MechActionState.Evading;
         agent.speed = walkSpeed;
         animator.SetTrigger(TRIGGER_WALK);
         agent.SetDestination(position);
     }
 
+    public void Attack()
+    {
+        if (!Player) return;
+        if (Vector3.Distance(this.transform.position, Player.transform.position) <= 2.0f)
+        {
+            MakeDecision();
+            return;
+        }
+
+        Debug.Log("Attack....");
+        mechActionState = MechActionState.Attacking;
+        agent.speed = walkSpeed;
+        animator.SetTrigger(TRIGGER_WALK);
+    }
+
+    public void Evade()
+    {
+        Debug.Log("Evade...");
+        mechActionState = MechActionState.Evading;
+        OnMechEvaded?.Invoke(this);
+    }
+
     void Update()
     {
-        if (isWalking)
+        switch (mechActionState)
         {
-            if (Vector3.Distance(this.transform.position, currentDestination) <= 0.1f)
-            {
-                DestinationReached();
-            }
+            case MechActionState.Idle:
+                break;
+            case MechActionState.Evading:
+                if (Vector3.Distance(this.transform.position, currentDestination) <= 0.1f)
+                {
+                    DestinationReached();
+                }
+                break;
+            case MechActionState.Attacking:
+                if (Vector3.Distance(this.transform.position, Player.transform.position) <= 2.0f)
+                {
+                    DestinationReached();
+                } else
+                {
+                    agent.SetDestination(Player.transform.position);
+                }
+                break;
+            default:
+                break;
         }
     }
 
     private void DestinationReached()
     {
         agent.speed = 0;
-        isWalking = false;
+        mechActionState = MechActionState.Idle;
         animator.SetTrigger(TRIGGER_IDLE);
 
-        //OnDestinationReached?.Invoke();
-        OnMechDestinationReached?.Invoke(this);
+        MakeDecision();
+    }
+
+    private void MakeDecision()
+    {
+        int decision = Random.Range(0, 2);
+
+        switch (decision)
+        {
+            case 0:
+                Attack();
+                break;
+
+            case 1:
+                Evade();
+                break;
+
+            default:
+                break;
+        }
     }
 }

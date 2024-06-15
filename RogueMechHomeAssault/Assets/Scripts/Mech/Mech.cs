@@ -13,16 +13,24 @@ public class Mech : MonoBehaviour
 {
     [SerializeField] NavMeshAgent agent;
     [SerializeField] Animator animator;
+    [SerializeField] MechVision mechVision;
 
     [SerializeField] float walkSpeed = 1.0f;
 
     private Vector3 currentDestination;
     private MechActionState mechActionState = MechActionState.Idle;
+    private PlayerCharacter player;
 
     private const string TRIGGER_WALK = "TriggerWalk";
     private const string TRIGGER_IDLE = "TriggerIdle";
 
-    public PlayerCharacter Player { get; set; }
+    public PlayerCharacter Player {
+        get { return player; }
+        set {
+            mechVision.Player = value;
+            player = value;
+        }
+    }
 
     public UnityAction OnDestinationReached;
     public UnityAction<Mech> OnMechDestinationReached;
@@ -32,6 +40,8 @@ public class Mech : MonoBehaviour
     {
         agent.speed = walkSpeed;
         agent.stoppingDistance = 0.0f;
+
+        mechVision.OnPlayerSeen += HandlePlayerSeen;
     }
 
     public void MoveTo(Vector3 position)
@@ -129,5 +139,10 @@ public class Mech : MonoBehaviour
             default:
                 break;
         }
+    }
+
+    private void HandlePlayerSeen()
+    {
+        Debug.Log("Player seen!!!!");
     }
 }

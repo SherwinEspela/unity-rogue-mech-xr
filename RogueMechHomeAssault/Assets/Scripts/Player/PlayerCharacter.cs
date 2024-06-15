@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class PlayerCharacter : MonoBehaviour
 {
-    private void OnTriggerEnter(Collider other)
-    {
-        Debug.Log($"other name ===== {other.name}");
-    }
+    //private void OnTriggerEnter(Collider other)
+    //{
+    //    Debug.Log($"other name ===== {other.name}");
+    //}
 }

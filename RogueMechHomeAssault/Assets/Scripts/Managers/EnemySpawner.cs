@@ -51,7 +51,7 @@ public class EnemySpawner : MonoBehaviour
 
         var randomPos = GetRandomSpawnPoint();
         mech.transform.position = randomPos;
-        SetNewDestination(mech);
+        //SetNewDestination(mech);
 
         mechs.Add(mech);
 

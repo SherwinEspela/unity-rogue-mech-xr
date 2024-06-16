@@ -68,7 +68,6 @@ public class Mech : MonoBehaviour
             return;
         }
 
-        Debug.Log("Attack....");
         mechActionState = MechActionState.Attacking;
         agent.speed = walkSpeed;
         animator.SetTrigger(TRIGGER_WALK);
@@ -76,7 +75,6 @@ public class Mech : MonoBehaviour
 
     public void Evade()
     {
-        Debug.Log("Evade...");
         mechActionState = MechActionState.Evading;
         OnMechEvaded?.Invoke(this);
     }
